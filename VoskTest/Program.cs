@@ -18,3 +18,5 @@ capture.DataAvailable += (s, a) =>
     }
 };
 
+Console.WriteLine("Press return to stop transcribing");
+Console.ReadLine();
