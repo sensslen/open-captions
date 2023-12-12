@@ -1,4 +1,5 @@
-﻿using NAudio.Wave;
+﻿using System.Text.Json;
+using NAudio.Wave;
 using Vosk;
 
 var model = new Model("vosk-model-small-en-us-0.15");
@@ -15,7 +16,10 @@ waveIn.DataAvailable += (s, a) =>
 {
     if (recognizer.AcceptWaveform(a.Buffer, a.BytesRecorded))
     {
-        Console.WriteLine(recognizer.Result());
+        var json = recognizer.Result();
+        var result = JsonSerializer.Deserialize<RecognizerResult>(json);
+        // Console.WriteLine(json);
+        Console.WriteLine(result?.text);
     }
 };
 
@@ -23,3 +27,9 @@ waveIn.StartRecording();
 
 Console.WriteLine("Press return to stop transcribing");
 Console.ReadLine();
+
+public class RecognizerResult
+{
+    public string? text { get; set; }
+};
+
