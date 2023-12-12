@@ -20,7 +20,6 @@ waveIn.DataAvailable += (s, a) =>
 };
 
 waveIn.StartRecording();
-while (true)
-{
-    Thread.Sleep(250);
-}
+
+Console.WriteLine("Press return to stop transcribing");
+Console.ReadLine();
