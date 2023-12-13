@@ -8,6 +8,9 @@ namespace Pro.LyricsBot.ViewModels
     public partial class SettingsVM : ObservableObject, ISettingsVM, ISettings
     {
         private IAudioToTextService? _audioToTextService;
+        private TextFormattingService? _textFormattingService;
+        private IDisposable _textChangeSubscription;
+        private SendToProPresenterService? _sendToProPresenterService;
 
         public ObservableCollection<IAudioDeviceDescription> Devices { get; } = new ObservableCollection<IAudioDeviceDescription>();
         public ObservableCollection<IVoskModelDescriptor> Models { get; } = new ObservableCollection<IVoskModelDescriptor>();
@@ -60,6 +63,10 @@ namespace Pro.LyricsBot.ViewModels
 
         [ObservableProperty]
         private string _startStopLabel = "Start";
+
+        [ObservableProperty]
+        private string _transcribedText = string.Empty;
+
         private readonly IAudioSourceProvider _audioSourceProvider;
         private readonly IModelServiceProvider _modelServiceProvider;
 
@@ -69,13 +76,37 @@ namespace Pro.LyricsBot.ViewModels
             if (StartStopLabel == "Start" && SelectedTranscriptionModel is not null && SelectedAudioSource is not null)
             {
                 _audioToTextService = new AudioToTextService(_modelServiceProvider.Get(SelectedTranscriptionModel), _audioSourceProvider.Open(SelectedAudioSource));
+                _textFormattingService = new TextFormattingService(_audioToTextService);
+                //_sendToProPresenterService = new SendToProPresenterService(MessageId, $"{ProPresenterHost}:{ProPresenterPort}");
+
+                _textChangeSubscription = _audioToTextService.WhenRecognizedTextChanged.Subscribe(text =>
+                {
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        TranscribedText = text;
+                    }
+                    //_sendToProPresenterService.SendAsync(text);
+                });
+
+                _textChangeSubscription = _audioToTextService.WhenRecognitionEnded.Subscribe(text =>
+                {
+                    TranscribedText = text;
+                    //_sendToProPresenterService.SendAsync(text);
+                });
+
 
                 StartStopLabel = "Stop";
             }
             else
             {
+                _textFormattingService?.Dispose();
+                _textFormattingService = null;
+
                 _audioToTextService?.Dispose();
                 _audioToTextService = null;
+
+                _sendToProPresenterService?.Dispose();
+                _sendToProPresenterService = null;
 
                 StartStopLabel = "Start";
             }

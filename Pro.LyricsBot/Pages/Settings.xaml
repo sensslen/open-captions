@@ -126,5 +126,8 @@
                 Command="{Binding StartStopCommand}"
                 Text="{Binding StartStopLabel}" />
 
+        <Label Style="{StaticResource headerStyle}"
+               Text="{Binding TranscribedText}" />
+
     </VerticalStackLayout>
 </ContentPage>

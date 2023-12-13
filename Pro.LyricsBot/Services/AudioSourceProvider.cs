@@ -23,7 +23,11 @@ namespace Pro.LyricsBot.Services
         {
             if (description is WrappedAudioDevice wrapped)
             {
-                return new WasapiLoopbackCapture(wrapped.Device);
+                var result = new WasapiCapture(wrapped.Device);
+                result.WaveFormat = new WaveFormat(16000, 1);
+
+                result.StartRecording();
+                return result;
             }
             throw new ArgumentException($"{description.GetType()} not supported");
         }

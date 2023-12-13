@@ -66,7 +66,7 @@ namespace Pro.LyricsBot.Services
             {
                 lines.AddRange(LineBreak(line));
             }
-            if (_partialText.Length > 0)
+            if ((_partialText?.Length??0) > 0)
             {
                 lines.AddRange(LineBreak(_partialText));
             }
