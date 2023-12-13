@@ -19,6 +19,7 @@ namespace Pro.LyricsBot.ViewModels
         string MessageId { get; set; }
         string TokenName { get; set; }
         string StartStopLabel { get; }
+        string TranscribedText { get; }
         IRelayCommand StartStopCommand { get; }
     }
 }

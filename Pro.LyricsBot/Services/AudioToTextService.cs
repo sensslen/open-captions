@@ -1,6 +1,8 @@
-﻿using System.Reactive.Linq;
+﻿using System.Diagnostics;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using NAudio.Wave;
 using Vosk;
 
@@ -32,6 +34,7 @@ namespace Pro.LyricsBot.Services
         {
             _audioStream.DataAvailable -= AudioDataReceived;
             _recognizer.Dispose();
+            _audioStream.Dispose();
         }
 
         private void AudioDataReceived(object? sender, WaveInEventArgs e)
@@ -39,6 +42,7 @@ namespace Pro.LyricsBot.Services
             if (_recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))
             {
                 var json = _recognizer.Result();
+                Trace.WriteLine(json);
                 var result = JsonSerializer.Deserialize<RecognizerResult>(json);
                 if (result is not null)
                 {
@@ -48,6 +52,7 @@ namespace Pro.LyricsBot.Services
             else
             {
                 var json = _recognizer.PartialResult();
+                Trace.WriteLine(json);
                 var partial = JsonSerializer.Deserialize<PartialRecognizerResult>(json);
 
                 if (partial is not null)
@@ -57,7 +62,7 @@ namespace Pro.LyricsBot.Services
             }
         }
 
-        private sealed record RecognizerResult(string Text);
-        private sealed record PartialRecognizerResult(string Partial);
+        private sealed record RecognizerResult([property: JsonPropertyName("text")] string Text);
+        private sealed record PartialRecognizerResult([property: JsonPropertyName("partial")] string Partial);
     }
 }
