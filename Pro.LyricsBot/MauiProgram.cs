@@ -16,7 +16,7 @@ namespace Pro.LyricsBot
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
