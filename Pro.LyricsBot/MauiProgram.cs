@@ -1,4 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
+using Pro.LyricsBot.Pages;
+using Pro.LyricsBot.Services;
+using Pro.LyricsBot.ViewModels;
 
 namespace Pro.LyricsBot
 {
@@ -14,6 +17,16 @@ namespace Pro.LyricsBot
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
+
+            builder.Services.AddSingleton<IAudioSourceProvider, AudioSourceProvider>();
+            builder.Services.AddSingleton<ISettingsVM, SettingsVM>();
+            builder.Services.AddSingleton<ISettings, SettingsVM>();
+
+            builder.Services.AddScoped(serviceProvider => new Settings()
+            {
+                BindingContext = serviceProvider.GetRequiredService<ISettingsVM>()
+            });
+
 
 #if DEBUG
             builder.Logging.AddDebug();
