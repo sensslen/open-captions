@@ -8,13 +8,18 @@ var messageId = "0";
 
 var httpClient = new HttpClient();
 
+var previousPartial = "";
+var red = "\x1b[31m";
+var resetColor = "\x1b[0m";
+var green = "\x1b[32m";
+
 var messageGetter = httpClient.GetAsync($"{host}v1/message/{messageId}");
 messageGetter.Wait();
 var message = JsonSerializer.Deserialize<Message>(messageGetter.Result.Content.ReadAsStream());
 
 Console.WriteLine(message.message);
 
-var model = new Model("vosk-model-small-en-us-0.15");
+var model = new Model("vosk-model-en-us-0.22-lgraph");
 
 var waveIn = new WaveInEvent(); // WasapiLoopbackCapture()
 waveIn.WaveFormat = new WaveFormat(16000, 1);
@@ -31,8 +36,22 @@ waveIn.DataAvailable += (s, a) =>
         var json = recognizer.Result();
         var result = JsonSerializer.Deserialize<RecognizerResult>(json);
         // Console.WriteLine(json);
-        Console.WriteLine(result?.text);
-        SendToPro(result?.text);
+        Console.WriteLine($"{red}{result?.text}{resetColor}");
+        SendToProAsync(result?.text);
+    }
+    else
+    {
+        var json = recognizer.PartialResult();
+        var partial = JsonSerializer.Deserialize<RecognizerPartial>(json);
+        if (partial != null && partial.partial.Length > 0)
+        {
+            if (partial.partial != previousPartial)
+            {
+                Console.WriteLine($"{green}{partial.partial}{resetColor}");
+                SendToProAsync(partial.partial);
+                previousPartial = partial.partial;
+            }
+        }
     }
 };
 
@@ -41,22 +60,23 @@ waveIn.StartRecording();
 Console.WriteLine("Press return to stop transcribing");
 Console.ReadLine();
 
-void SendToPro(string? text)
+async Task SendToProAsync(string? text)
 {
     message.message = text;
     var content = JsonContent.Create<Message>(message);
-    var messagePutter = httpClient.PutAsync($"{host}v1/message/{messageId}", content);
-    messagePutter.Wait();
-
-    var emptyTrigger = new List<Token>();
-    var triggerContent = JsonContent.Create(emptyTrigger.ToArray());
-    var trigger = httpClient.PostAsync($"{host}v1/message/{messageId}/trigger", triggerContent);
-    trigger.Wait();
+    await httpClient.PutAsync($"{host}v1/message/{messageId}", content);
+    var triggerContent = JsonContent.Create(new List<Token>().ToArray());
+    await httpClient.PostAsync($"{host}v1/message/{messageId}/trigger", triggerContent);
 }
 
 public class RecognizerResult
 {
     public string? text { get; set; }
+};
+
+public class RecognizerPartial
+{
+    public string? partial { get; set; }
 };
 
 public class Id
