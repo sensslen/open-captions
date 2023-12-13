@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Pro.LyricsBot.Services;
 using System.Collections.ObjectModel;
 
@@ -6,12 +7,20 @@ namespace Pro.LyricsBot.ViewModels
 {
     public partial class SettingsVM : ObservableObject, ISettingsVM, ISettings
     {
+        private IAudioToTextService? _audioToTextService;
+
         public ObservableCollection<IAudioDeviceDescription> Devices { get; } = new ObservableCollection<IAudioDeviceDescription>();
+        public ObservableCollection<IVoskModelDescriptor> Models { get; } = new ObservableCollection<IVoskModelDescriptor>();
 
         [ObservableProperty]
         private IAudioDeviceDescription? _selectedAudioSource;
 
         partial void OnSelectedAudioSourceChanged(IAudioDeviceDescription? value) => Preferences.Default.Set(nameof(SelectedAudioSource), value?.Id ?? string.Empty);
+
+        [ObservableProperty]
+        private IVoskModelDescriptor? _selectedTranscriptionModel;
+
+        partial void OnSelectedTranscriptionModelChanged(IVoskModelDescriptor? value) => Preferences.Default.Set(nameof(SelectedTranscriptionModel), value?.Id ?? string.Empty);
 
 
         [ObservableProperty]
@@ -49,17 +58,51 @@ namespace Pro.LyricsBot.ViewModels
 
         partial void OnTokenNameChanged(string value) => Preferences.Default.Set(nameof(TokenName), value);
 
-        public SettingsVM(IAudioSourceProvider audioSourceProvider)
+        [ObservableProperty]
+        private string _startStopLabel = "Start";
+        private readonly IAudioSourceProvider _audioSourceProvider;
+        private readonly IModelServiceProvider _modelServiceProvider;
+
+        [RelayCommand]
+        private void StartStop()
         {
-            var previousSelection = Preferences.Default.Get(nameof(SelectedAudioSource), string.Empty);
-            foreach (var device in audioSourceProvider.GetAvaialble())
+            if (StartStopLabel == "Start" && SelectedTranscriptionModel is not null && SelectedAudioSource is not null)
+            {
+                _audioToTextService = new AudioToTextService(_modelServiceProvider.Get(SelectedTranscriptionModel), _audioSourceProvider.Open(SelectedAudioSource));
+
+                StartStopLabel = "Stop";
+            }
+            else
+            {
+                _audioToTextService?.Dispose();
+                _audioToTextService = null;
+
+                StartStopLabel = "Start";
+            }
+        }
+
+        public SettingsVM(IAudioSourceProvider audioSourceProvider, IModelServiceProvider modelServiceProvider)
+        {
+            var previousDeviceSelection = Preferences.Default.Get(nameof(SelectedAudioSource), string.Empty);
+            foreach (var device in audioSourceProvider.GetAvailable())
             {
                 Devices.Add(device);
-                if (device.Id == previousSelection)
+                if (device.Id == previousDeviceSelection)
                 {
                     SelectedAudioSource = device;
                 }
             }
+            var previousModelSelection = Preferences.Default.Get(nameof(SelectedTranscriptionModel), string.Empty);
+            foreach (var model in modelServiceProvider.Available())
+            {
+                Models.Add(model);
+                if (model.Id == previousModelSelection)
+                {
+                    SelectedTranscriptionModel = model;
+                }
+            }
+            _audioSourceProvider = audioSourceProvider;
+            _modelServiceProvider = modelServiceProvider;
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Pro.LyricsBot
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
+            builder.Services.AddSingleton<IModelServiceProvider, ModelServiceProvider>();
             builder.Services.AddSingleton<IAudioSourceProvider, AudioSourceProvider>();
             builder.Services.AddSingleton<ISettingsVM, SettingsVM>();
             builder.Services.AddSingleton<ISettings, SettingsVM>();

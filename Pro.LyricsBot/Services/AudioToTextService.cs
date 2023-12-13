@@ -17,11 +17,10 @@ namespace Pro.LyricsBot.Services
 
         public IObservable<string> WhenRecognitionEnded => _recognitionEndedSubject;
 
-        public AudioToTextService(string pathToRecognitionModel, IWaveIn audioStream)
+        public AudioToTextService(Model model, IWaveIn audioStream)
         {
             _audioStream = audioStream;
 
-            var model = new Model(pathToRecognitionModel);
             _recognizer = new VoskRecognizer(model, audioStream.WaveFormat.SampleRate);
             _recognizer.SetMaxAlternatives(0);
             _recognizer.SetWords(true);

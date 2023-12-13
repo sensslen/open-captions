@@ -8,7 +8,7 @@ namespace Pro.LyricsBot.Services
 
     public class AudioSourceProvider : IAudioSourceProvider
     {
-        public IEnumerable<IAudioDeviceDescription> GetAvaialble()
+        public IEnumerable<IAudioDeviceDescription> GetAvailable()
         {
             var enumerator = new MMDeviceEnumerator();
             foreach (MMDevice device in enumerator.EnumerateAudioEndPoints(DataFlow.Capture, DeviceState.All))

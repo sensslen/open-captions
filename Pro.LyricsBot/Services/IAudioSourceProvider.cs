@@ -6,7 +6,7 @@ namespace Pro.LyricsBot.Services
 {
     public interface IAudioSourceProvider
     {
-        IEnumerable<IAudioDeviceDescription> GetAvaialble();
+        IEnumerable<IAudioDeviceDescription> GetAvailable();
 
         IWaveIn Open(IAudioDeviceDescription description);
     }
