@@ -1,8 +1,9 @@
 ﻿namespace Pro.LyricsBot.Services
 {
+    public record TextRecognitionResult(string text, bool isEnd);
+
     public interface IAudioToTextService : IDisposable
     {
-        IObservable<string> WhenRecognizedTextChanged { get; }
-        IObservable<string> WhenRecognitionEnded { get; }
+        IObservable<TextRecognitionResult> WhenTextChanged { get; }
     }
 }

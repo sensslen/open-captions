@@ -10,14 +10,12 @@ namespace Pro.LyricsBot.Services
 {
     internal class AudioToTextService : DisposableBase, IAudioToTextService
     {
-        private readonly SubjectBase<string> _textChangedSubject = new ReplaySubject<string>(1);
-        private readonly SubjectBase<string> _recognitionEndedSubject = new ReplaySubject<string>(1);
+        private readonly SubjectBase<TextRecognitionResult> _textChangedSubject = new ReplaySubject<TextRecognitionResult>(1);
         private readonly VoskRecognizer _recognizer;
         private readonly IWaveIn _audioStream;
 
-        public IObservable<string> WhenRecognizedTextChanged => _textChangedSubject.DistinctUntilChanged();
+        public IObservable<TextRecognitionResult> WhenTextChanged => _textChangedSubject.DistinctUntilChanged();
 
-        public IObservable<string> WhenRecognitionEnded => _recognitionEndedSubject;
 
         public AudioToTextService(Model model, IWaveIn audioStream)
         {
@@ -46,7 +44,7 @@ namespace Pro.LyricsBot.Services
                 var result = JsonSerializer.Deserialize<RecognizerResult>(json);
                 if (result is not null)
                 {
-                    _recognitionEndedSubject.OnNext(result.Text);
+                    _textChangedSubject.OnNext(new TextRecognitionResult(result.Text, true));
                 }
             }
             else
@@ -57,7 +55,7 @@ namespace Pro.LyricsBot.Services
 
                 if (partial is not null)
                 {
-                    _textChangedSubject.OnNext(partial.Partial);
+                    _textChangedSubject.OnNext(new TextRecognitionResult(partial.Partial, false));
                 }
             }
         }
