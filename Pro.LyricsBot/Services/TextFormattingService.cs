@@ -1,13 +1,17 @@
-﻿using System.Reactive.Linq;
+﻿// Copyright (c) Renewed Vision, LLC. All rights reserved.
+
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 
 namespace Pro.LyricsBot.Services
 {
-    internal class TextFormattingService : ITextFormattingService
+    internal class TextFormattingService : DisposableBase, ITextFormattingService
     {
         private readonly SubjectBase<string> _textChangedSubject = new ReplaySubject<string>(1);
         private IAudioToTextService _audioToTextService;
+        private IDisposable _recognitionEndedSubscription;
+        private IDisposable _recognizedTextChangedSubscription;
         private List<string> _previousLines = new List<string>();
         private string _partialText = "";
 
@@ -17,8 +21,8 @@ namespace Pro.LyricsBot.Services
         public TextFormattingService(IAudioToTextService audioToTextService)
         {
             _audioToTextService = audioToTextService;
-            _audioToTextService.WhenRecognitionEnded.Subscribe(AddFinalText);
-            _audioToTextService.WhenRecognizedTextChanged.Subscribe(UpdatePartialText);
+            _recognitionEndedSubscription = _audioToTextService.WhenRecognitionEnded.Subscribe(AddFinalText);
+            _recognizedTextChangedSubscription = _audioToTextService.WhenRecognizedTextChanged.Subscribe(UpdatePartialText);
         }
 
         public IObservable<string> WhenTextChanged => _textChangedSubject.DistinctUntilChanged();
@@ -92,5 +96,10 @@ namespace Pro.LyricsBot.Services
             FormatText();
         }
 
+        protected override void OnDispose()
+        {
+            _recognizedTextChangedSubscription.Dispose();
+            _recognizedTextChangedSubscription.Dispose();
+        }
     }
 }
