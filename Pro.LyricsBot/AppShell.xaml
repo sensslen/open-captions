@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Pro.LyricsBot.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:converters="clr-namespace:Pro.LyricsBot.Converters"
+    xmlns:local="clr-namespace:Pro.LyricsBot"
+    xmlns:pages="clr-namespace:Pro.LyricsBot.Pages"
+    Title="Lyrics Bot"
+    FlyoutBehavior="Locked">
+    <FlyoutItem Title="Settings">
+        <ShellContent
+            Title="Settings"
+            ContentTemplate="{DataTemplate pages:Settings}"
+            Route="Settings" />
+    </FlyoutItem>
+
+    <FlyoutItem Title="Slides">
+        <ShellContent
+            Title="Slides"
+            ContentTemplate="{DataTemplate pages:MainPage}"
+            Route="Slides" />
+    </FlyoutItem>
+
+</Shell>
