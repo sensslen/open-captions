@@ -42,34 +42,8 @@
                 Grid.Column="0"
                 Margin="5"
                 Padding="5">
-            <ListView ItemsSource="{Binding Devices}"
-                      SelectedItem="{Binding SelectedDevice}"
-                      SeparatorVisibility="Default"
-                      VerticalScrollBarVisibility="Default">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <ViewCell>
-                            <Grid Padding="10">
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="Auto" />
-                                </Grid.RowDefinitions>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="Auto" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <Label Grid.Column="0"
-                                       FontAttributes="Bold"
-                                       Text="{Binding FriendlyName}" />
-                                <!--<Label Grid.Row="1"
-                                       Grid.Column="1"
-                                       Text="{Binding State}"
-                                       VerticalOptions="End" />-->
-                            </Grid>
-                        </ViewCell>
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
+            <Picker ItemsSource="{Binding Devices}"
+                    SelectedItem="{Binding SelectedDevice}" />
         </Border>
 
         <Label Grid.Row="2"
@@ -131,7 +105,7 @@
             <Label Grid.Row="0"
                    Grid.Column="0"
                    HorizontalTextAlignment="Center"
-                   Text="Message ID" />
+                   Text="Message Name" />
             <Entry Grid.Row="1"
                    Grid.Column="0"
                    Width="180"
