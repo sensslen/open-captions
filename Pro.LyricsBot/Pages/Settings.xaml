@@ -20,40 +20,28 @@
         </Style>
     </ContentPage.Resources>
 
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
+    <VerticalStackLayout>
         <Label Style="{StaticResource headerStyle}"
                Text="Active Audio Devices" />
-        <Border Grid.Row="1"
-                Grid.Column="0"
-                Margin="5"
+        <Border Margin="5"
                 Padding="5">
             <Picker ItemDisplayBinding="{Binding Name}"
                     ItemsSource="{Binding Devices}"
                     SelectedItem="{Binding SelectedAudioSource}" />
         </Border>
+        <Label Style="{StaticResource headerStyle}"
+               Text="Active Model" />
+        <Border Margin="5"
+                Padding="5">
+            <Picker ItemDisplayBinding="{Binding Name}"
+                    ItemsSource="{Binding Models}"
+                    SelectedItem="{Binding SelectedTranscriptionModel}" />
+        </Border>
 
-        <Label Grid.Row="2"
-               Grid.Column="0"
-               Style="{StaticResource headerStyle}"
+        <Label Style="{StaticResource headerStyle}"
                Text="ProPresenter" />
 
-        <Grid Grid.Row="3"
-              Grid.Column="0"
-              Margin="10">
+        <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -80,15 +68,11 @@
                    Text="{Binding ProPresenterPort}" />
         </Grid>
 
-        <Label Grid.Row="4"
-               Grid.Column="0"
-               Style="{StaticResource headerStyle}"
+        <Label Style="{StaticResource headerStyle}"
                Text="Message" />
 
 
-        <Grid Grid.Row="5"
-              Grid.Column="0"
-              Margin="10">
+        <Grid Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -138,20 +122,9 @@
         </Grid>
 
 
-        <Grid Grid.Row="6"
-              Grid.Column="0"
-              Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition />
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-            <Button Grid.Column="0"
-                    Margin="10"
-                    Text="Play" />
-            <Button Grid.Column="1"
-                    Margin="10"
-                    Text="Stop" />
-        </Grid>
+        <Button Margin="10"
+                Command="{Binding StartStopCommand}"
+                Text="{Binding StartStopLabel}" />
 
-    </Grid>
+    </VerticalStackLayout>
 </ContentPage>
