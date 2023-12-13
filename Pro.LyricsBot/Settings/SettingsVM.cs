@@ -2,12 +2,14 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Input;
 
 namespace Pro.LyricsBot.Settings
 {
     internal class SettingsVM : INotifyPropertyChanged
     {
         private MMDevice? _selectedDevice;
+        private bool _isPlaying;
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ObservableCollection<MMDevice> Devices { get; private set; } = new();
@@ -77,6 +79,16 @@ namespace Pro.LyricsBot.Settings
             }
         }
 
+        public bool IsPlaying
+        {
+            get => _isPlaying;
+            set => SetField(ref _isPlaying, value);
+        }
+
+        public ICommand PlayCommand { get; set; }
+
+        public ICommand StopCommand { get; set; }
+
         public SettingsVM()
         {
             var enumerator = new MMDeviceEnumerator();
@@ -96,6 +108,22 @@ namespace Pro.LyricsBot.Settings
             {
                 Settings.SourceDeviceId = null;
             }
+
+            PlayCommand = new Command(
+                execute: OnPlay,
+                canExecute: () => ProPresenterHost is not null && !IsPlaying);
+
+            StopCommand = new Command(execute: OnStop);
+        }
+
+        private void OnPlay()
+        {
+            IsPlaying = true;
+        }
+
+        private void OnStop()
+        {
+            IsPlaying = false;
         }
 
         protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

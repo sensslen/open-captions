@@ -1,19 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage
-    x:Class="Pro.LyricsBot.Pages.Settings"
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:settings="clr-namespace:Pro.LyricsBot.Settings"
-    Title="Settings">
+<ContentPage x:Class="Pro.LyricsBot.Pages.Settings"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:settings="clr-namespace:Pro.LyricsBot.Settings"
+             Title="Settings">
     <ContentPage.BindingContext>
         <settings:SettingsVM />
     </ContentPage.BindingContext>
     <ContentPage.Resources>
-        <Style x:Key="headerStyle" TargetType="Label">
-            <Setter Property="HorizontalOptions" Value="Start" />
-            <Setter Property="VerticalOptions" Value="Start" />
-            <Setter Property="FontSize" Value="22" />
-            <Setter Property="Margin" Value="5,15,0,5" />
+        <Style x:Key="headerStyle"
+               TargetType="Label">
+            <Setter Property="HorizontalOptions"
+                    Value="Start" />
+            <Setter Property="VerticalOptions"
+                    Value="Start" />
+            <Setter Property="FontSize"
+                    Value="22" />
+            <Setter Property="Margin"
+                    Value="5,15,0,5" />
         </Style>
     </ContentPage.Resources>
 
@@ -32,17 +36,16 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Label Style="{StaticResource headerStyle}" Text="Active Audio Devices" />
-        <Border
-            Grid.Row="1"
-            Grid.Column="0"
-            Margin="5"
-            Padding="5">
-            <ListView
-                ItemsSource="{Binding Devices}"
-                SelectedItem="{Binding SelectedDevice}"
-                SeparatorVisibility="Default"
-                VerticalScrollBarVisibility="Default">
+        <Label Style="{StaticResource headerStyle}"
+               Text="Active Audio Devices" />
+        <Border Grid.Row="1"
+                Grid.Column="0"
+                Margin="5"
+                Padding="5">
+            <ListView ItemsSource="{Binding Devices}"
+                      SelectedItem="{Binding SelectedDevice}"
+                      SeparatorVisibility="Default"
+                      VerticalScrollBarVisibility="Default">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <ViewCell>
@@ -55,10 +58,9 @@
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
 
-                                <Label
-                                    Grid.Column="0"
-                                    FontAttributes="Bold"
-                                    Text="{Binding FriendlyName}" />
+                                <Label Grid.Column="0"
+                                       FontAttributes="Bold"
+                                       Text="{Binding FriendlyName}" />
                                 <!--<Label Grid.Row="1"
                                        Grid.Column="1"
                                        Text="{Binding State}"
@@ -70,16 +72,14 @@
             </ListView>
         </Border>
 
-        <Label
-            Grid.Row="2"
-            Grid.Column="0"
-            Style="{StaticResource headerStyle}"
-            Text="ProPresenter" />
+        <Label Grid.Row="2"
+               Grid.Column="0"
+               Style="{StaticResource headerStyle}"
+               Text="ProPresenter" />
 
-        <Grid
-            Grid.Row="3"
-            Grid.Column="0"
-            Margin="10">
+        <Grid Grid.Row="3"
+              Grid.Column="0"
+              Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -88,26 +88,22 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Label
-                Grid.Row="0"
-                Grid.Column="0"
-                HorizontalTextAlignment="Center"
-                Text="Host" />
-            <Entry
-                Grid.Row="1"
-                Grid.Column="0"
-                Width="180"
-                Text="{Binding ProPresenterHost}" />
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalTextAlignment="Center"
+                   Text="Host" />
+            <Entry Grid.Row="1"
+                   Grid.Column="0"
+                   Width="180"
+                   Text="{Binding ProPresenterHost}" />
 
-            <Label
-                Grid.Row="0"
-                Grid.Column="1"
-                HorizontalTextAlignment="Center"
-                Text="Port" />
-            <Entry
-                Grid.Row="1"
-                Grid.Column="1"
-                Text="{Binding ProPresenterPort}" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalTextAlignment="Center"
+                   Text="Port" />
+            <Entry Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding ProPresenterPort}" />
         </Grid>
 
         <!--<HorizontalStackLayout Grid.Row="3" Grid.Column="0">
@@ -122,17 +118,15 @@
         </HorizontalStackLayout>-->
 
 
-        <Label
-            Grid.Row="4"
-            Grid.Column="0"
-            Style="{StaticResource headerStyle}"
-            Text="Message" />
+        <Label Grid.Row="4"
+               Grid.Column="0"
+               Style="{StaticResource headerStyle}"
+               Text="Message" />
 
 
-        <Grid
-            Grid.Row="5"
-            Grid.Column="0"
-            Margin="10">
+        <Grid Grid.Row="5"
+              Grid.Column="0"
+              Margin="10">
             <Grid.RowDefinitions>
                 <RowDefinition />
                 <RowDefinition />
@@ -141,45 +135,40 @@
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Label
-                Grid.Row="0"
-                Grid.Column="0"
-                HorizontalTextAlignment="Center"
-                Text="Line Length" />
-            <Entry
-                Grid.Row="1"
-                Grid.Column="0"
-                Width="180"
-                Text="{Binding LineLength}" />
+            <Label Grid.Row="0"
+                   Grid.Column="0"
+                   HorizontalTextAlignment="Center"
+                   Text="Line Length" />
+            <Entry Grid.Row="1"
+                   Grid.Column="0"
+                   Width="180"
+                   Text="{Binding LineLength}" />
 
-            <Label
-                Grid.Row="0"
-                Grid.Column="1"
-                HorizontalTextAlignment="Center"
-                Text="Line Count" />
-            <Entry
-                Grid.Row="1"
-                Grid.Column="1"
-                Text="{Binding LineCount}" />
+            <Label Grid.Row="0"
+                   Grid.Column="1"
+                   HorizontalTextAlignment="Center"
+                   Text="Line Count" />
+            <Entry Grid.Row="1"
+                   Grid.Column="1"
+                   Text="{Binding LineCount}" />
         </Grid>
 
 
-        <Grid
-            Grid.Row="6"
-            Grid.Column="0"
-            Margin="10">
+        <Grid Grid.Row="6"
+              Grid.Column="0"
+              Margin="10">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
-            <Button
-                Grid.Column="0"
-                Margin="10"
-                Text="Play" />
-            <Button
-                Grid.Column="1"
-                Margin="10"
-                Text="Stop" />
+            <Button Grid.Column="0"
+                    Margin="10"
+                    Command="{Binding PlayCommand}"
+                    Text="Play" />
+            <Button Grid.Column="1"
+                    Margin="10"
+                    Command="{Binding StopCommand}"
+                    Text="Stop" />
         </Grid>
 
     </Grid>
