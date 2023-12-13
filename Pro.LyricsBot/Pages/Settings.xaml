@@ -2,11 +2,10 @@
 <ContentPage x:Class="Pro.LyricsBot.Pages.Settings"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:settings="clr-namespace:Pro.LyricsBot.Settings"
-             Title="Settings">
-    <ContentPage.BindingContext>
-        <settings:SettingsVM />
-    </ContentPage.BindingContext>
+             xmlns:services="clr-namespace:Pro.LyricsBot.Services"
+             xmlns:vm="clr-namespace:Pro.LyricsBot.ViewModels"
+             Title="Settings"
+             x:DataType="vm:ISettingsVM">
     <ContentPage.Resources>
         <Style x:Key="headerStyle"
                TargetType="Label">
@@ -42,8 +41,9 @@
                 Grid.Column="0"
                 Margin="5"
                 Padding="5">
-            <Picker ItemsSource="{Binding Devices}"
-                    SelectedItem="{Binding SelectedDevice}" />
+            <Picker ItemDisplayBinding="{Binding Name}"
+                    ItemsSource="{Binding Devices}"
+                    SelectedItem="{Binding SelectedAudioSource}" />
         </Border>
 
         <Label Grid.Row="2"
@@ -147,11 +147,9 @@
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
                     Margin="10"
-                    Command="{Binding PlayCommand}"
                     Text="Play" />
             <Button Grid.Column="1"
                     Margin="10"
-                    Command="{Binding StopCommand}"
                     Text="Stop" />
         </Grid>
 
