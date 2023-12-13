@@ -1,18 +1,17 @@
-﻿using NAudio.Wave;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text.Json;
+using NAudio.Wave;
 using Vosk;
 
 namespace Pro.LyricsBot.Services
 {
-    internal class AudioToTextService : IAudioToTextService
+    internal class AudioToTextService : DisposableBase, IAudioToTextService
     {
         private readonly SubjectBase<string> _textChangedSubject = new ReplaySubject<string>(1);
         private readonly SubjectBase<string> _recognitionEndedSubject = new ReplaySubject<string>(1);
         private readonly VoskRecognizer _recognizer;
         private readonly IWaveIn _audioStream;
-        private bool disposedValue;
 
         public IObservable<string> WhenRecognizedTextChanged => _textChangedSubject.DistinctUntilChanged();
 
@@ -30,23 +29,14 @@ namespace Pro.LyricsBot.Services
             _audioStream.DataAvailable += AudioDataReceived;
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected override void OnDispose()
         {
-            if (!disposedValue)
-            {
-                if (disposing)
-                {
-                    _audioStream.DataAvailable -= AudioDataReceived;
-                    _recognizer.Dispose();
-                }
-
-                disposedValue = true;
-            }
+            _audioStream.DataAvailable -= AudioDataReceived;
+            _recognizer.Dispose();
         }
 
         private void AudioDataReceived(object? sender, WaveInEventArgs e)
         {
-
             if (_recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))
             {
                 var json = _recognizer.Result();
@@ -68,14 +58,7 @@ namespace Pro.LyricsBot.Services
             }
         }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
+        private sealed record RecognizerResult(string Text);
+        private sealed record PartialRecognizerResult(string Partial);
     }
-
-    public record RecognizerResult(string Text);
-    public record PartialRecognizerResult(string Partial);
 }
