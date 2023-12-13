@@ -66,6 +66,32 @@ namespace Pro.LyricsBot.Settings
             }
         }
 
+        public string? MessageId
+        {
+            get => Settings.MessageId;
+            set
+            {
+                if (Settings.MessageId != value)
+                {
+                    Settings.MessageId = value;
+                    Preferences.Default.Set("MessageId", Settings.MessageId);
+                }
+            }
+        }
+
+        public string? TokenName
+        {
+            get => Settings.TokenName;
+            set
+            {
+                if (Settings.TokenName != value)
+                {
+                    Settings.TokenName = value;
+                    Preferences.Default.Set("TokenName", Settings.TokenName);
+                }
+            }
+        }
+
         public int LineCount
         {
             get => Settings.LineCount;
