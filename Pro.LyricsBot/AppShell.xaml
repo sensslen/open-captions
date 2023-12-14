@@ -3,18 +3,8 @@
        xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
        xmlns:pages="clr-namespace:Pro.LyricsBot.Pages"
-       Title="Lyrics Bot"
-       FlyoutBehavior="Locked">
-    <FlyoutItem Title="Settings">
-        <ShellContent Title="Settings"
-                      ContentTemplate="{DataTemplate pages:Settings}"
-                      Route="Settings" />
-    </FlyoutItem>
-
-    <FlyoutItem Title="Slides">
-        <ShellContent Title="Slides"
-                      ContentTemplate="{DataTemplate pages:MainPage}"
-                      Route="Slides" />
-    </FlyoutItem>
+       Title="Open Captions"
+       FlyoutBehavior="Disabled">
+    <ShellContent ContentTemplate="{DataTemplate pages:Settings}" />
 
 </Shell>
