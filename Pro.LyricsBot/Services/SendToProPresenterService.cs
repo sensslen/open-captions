@@ -16,7 +16,6 @@ namespace Pro.LyricsBot.Services
         {
             _client = new RestClient();
             _settings = settings;
-            _getMessageTask = GetMessageAsync();
         }
 
         public async Task<bool> SendAsync(string text)
