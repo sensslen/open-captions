@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Pro.LyricsBot.Services;
 
 namespace Pro.LyricsBot.ViewModels
@@ -22,18 +23,33 @@ namespace Pro.LyricsBot.ViewModels
         public string TokenName { get => _settings.TokenName; set => _settings.TokenName = value; }
 
         [ObservableProperty]
-        private string _startStopLabel = "Start";
+        [NotifyPropertyChangedFor(nameof(StartStopLabel))]
+        private bool _isTranscribing = GetPreference(nameof(IsTranscribing), false);
+
+        partial void OnIsTranscribingChanged(bool value)
+        {
+            SetPreference(nameof(IsTranscribing), value);
+        }
+
+        public string StartStopLabel => IsTranscribing ? "Stop sending to ProPresenter" : "Start sending to ProPresenter";
 
         [ObservableProperty]
         private string _transcribedText = string.Empty;
         private bool _disposedValue;
         private readonly IWritableSettings _settings;
 
-        public SettingsVM(IEnumerable<IModelSettingsVM> availableModelSettings, ITextFormattingService textFormattingService, IWritableSettings settings)
+        public SettingsVM(IEnumerable<IModelSettingsVM> availableModelSettings, ITextFormattingService textFormattingService, IWritableSettings settings, ISendToProPresenterService sendToProPresenterService)
         {
             ModelSettingsProviders = availableModelSettings;
             _settings = settings;
-            _transcribedTextSubscription = textFormattingService.WhenTextChanged.Subscribe(text => TranscribedText = text);
+            _transcribedTextSubscription = textFormattingService.WhenTextChanged.Subscribe(text =>
+            {
+                TranscribedText = text;
+                if (IsTranscribing)
+                {
+                    sendToProPresenterService.SendAsync(text);
+                }
+            });
 
             var previousModelPorviderSelection = GetPreference(nameof(SelectedModelSettingsProvider), string.Empty);
             foreach (var provider in ModelSettingsProviders)
@@ -46,6 +62,9 @@ namespace Pro.LyricsBot.ViewModels
 
             _settings.PropertyChanged += OnSettingsPropertyChanged;
         }
+
+        [RelayCommand]
+        private void StartStop() => IsTranscribing = !IsTranscribing;
 
         private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
