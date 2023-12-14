@@ -7,7 +7,7 @@ namespace Pro.LyricsBot.Services
     {
         private readonly BehaviorSubject<IAudioToTextService?> _audioToTextServiceSubject = new BehaviorSubject<IAudioToTextService?>(default);
 
-        public IObservable<TextRecognitionResult> WhenTextChanged => _audioToTextServiceSubject.Where(s => s is not null).Select(s => s!.WhenTextChanged).Switch();
+        public IObservable<TextRecognitionResult> WhenTextChanged => _audioToTextServiceSubject.Select(GetTextChangeObservable).Switch();
 
         protected override void OnDispose()
         {
@@ -19,6 +19,11 @@ namespace Pro.LyricsBot.Services
         {
             _audioToTextServiceSubject.Value?.Dispose();
             _audioToTextServiceSubject.OnNext(audioToTextService);
+        }
+
+        public IObservable<TextRecognitionResult> GetTextChangeObservable(IAudioToTextService? service)
+        {
+            return service?.WhenTextChanged ?? Observable.Empty<TextRecognitionResult>();
         }
     }
 }

@@ -21,15 +21,14 @@ namespace Pro.LyricsBot
 
             builder.Services.AddSingleton<IVoskModelProvider, VoskModelProvider>();
             builder.Services.AddSingleton<IAudioSourceProvider, AudioSourceProvider>();
-            builder.Services.AddSingleton<IAudioToTextService, SwitchableAudioToTextService>();
             builder.Services.AddSingleton<ISwitchableAudioToTextService, SwitchableAudioToTextService>();
+            builder.Services.AddSingleton<IAudioToTextService>(provider => provider.GetService<ISwitchableAudioToTextService>()!);
             builder.Services.AddSingleton<IVoskAudioToTextFactory, VoskAudioToTextFactory>();
             builder.Services.AddSingleton<ISettingsVM, SettingsVM>();
-            builder.Services.AddSingleton<ISettings, SettingsVM>();
             builder.Services.AddSingleton<IModelSettingsVM, VoskModelSettingsVM>();
             builder.Services.AddSingleton<ITextFormattingService, TextFormattingService>();
-            builder.Services.AddSingleton<ISettings, Services.Settings>();
             builder.Services.AddSingleton<IWritableSettings, Services.Settings>();
+            builder.Services.AddSingleton<ISettings>(provider => provider.GetService<IWritableSettings>()!);
 
             builder.Services.AddScoped(serviceProvider => new Pages.Settings()
             {

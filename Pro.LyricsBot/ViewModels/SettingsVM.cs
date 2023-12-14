@@ -4,7 +4,7 @@ using Pro.LyricsBot.Services;
 
 namespace Pro.LyricsBot.ViewModels
 {
-    public partial class SettingsVM : ObservableObject, ISettingsVM, ISettings, IDisposable
+    public partial class SettingsVM : ObservableObject, ISettingsVM, IDisposable
     {
         public IEnumerable<IModelSettingsVM> ModelSettingsProviders { get; }
 
