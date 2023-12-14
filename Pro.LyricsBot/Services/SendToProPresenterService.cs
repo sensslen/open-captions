@@ -15,8 +15,8 @@ namespace Pro.LyricsBot.Services
         public SendToProPresenterService(ISettings settings)
         {
             _client = new RestClient();
-            _getMessageTask = GetMessageAsync();
             _settings = settings;
+            _getMessageTask = GetMessageAsync();
         }
 
         private async Task<Message?> GetMessageAsync()
