@@ -4,7 +4,7 @@ using NAudio.CoreAudioApi;
 using NAudio.Wave;
 using Pro.LyricsBot.ViewModels;
 
-namespace Pro.LyricsBot.Services.VoskTranscriber
+namespace Pro.LyricsBot.Services
 {
 
     public class AudioSourceProvider : IAudioSourceProvider

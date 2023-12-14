@@ -1,6 +1,8 @@
 ﻿// Copyright (c) Renewed Vision, LLC. All rights reserved.
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Pro.LyricsBot.Services;
 using Pro.LyricsBot.Services.VoskTranscriber;
 
 namespace Pro.LyricsBot.ViewModels.Models
