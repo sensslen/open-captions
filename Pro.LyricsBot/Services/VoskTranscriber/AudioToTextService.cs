@@ -6,9 +6,9 @@ using System.Text.Json.Serialization;
 using NAudio.Wave;
 using Vosk;
 
-namespace Pro.LyricsBot.Services
+namespace Pro.LyricsBot.Services.VoskTranscriber
 {
-    internal class AudioToTextService : DisposableBase, IAudioToTextService
+    internal class VoskAudioToTextService : DisposableBase, IAudioToTextService
     {
         private readonly SubjectBase<TextRecognitionResult> _textChangedSubject = new ReplaySubject<TextRecognitionResult>(1);
         private readonly VoskRecognizer _recognizer;
@@ -16,8 +16,7 @@ namespace Pro.LyricsBot.Services
 
         public IObservable<TextRecognitionResult> WhenTextChanged => _textChangedSubject.DistinctUntilChanged();
 
-
-        public AudioToTextService(Model model, IWaveIn audioStream)
+        public VoskAudioToTextService(Model model, IWaveIn audioStream)
         {
             _audioStream = audioStream;
 
@@ -40,7 +39,6 @@ namespace Pro.LyricsBot.Services
             if (_recognizer.AcceptWaveform(e.Buffer, e.BytesRecorded))
             {
                 var json = _recognizer.Result();
-                Trace.WriteLine(json);
                 var result = JsonSerializer.Deserialize<RecognizerResult>(json);
                 if (result is not null)
                 {
@@ -50,7 +48,6 @@ namespace Pro.LyricsBot.Services
             else
             {
                 var json = _recognizer.PartialResult();
-                Trace.WriteLine(json);
                 var partial = JsonSerializer.Deserialize<PartialRecognizerResult>(json);
 
                 if (partial is not null)

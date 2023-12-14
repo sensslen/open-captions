@@ -1,8 +1,8 @@
 ﻿// Copyright (c) Renewed Vision, LLC. All rights reserved.
 
-namespace Pro.LyricsBot.Services
+namespace Pro.LyricsBot.ViewModels
 {
-    public interface IVoskModelDescriptor
+    public interface ISelectionDescriptor
     {
         string Name { get; }
         string Id { get; }

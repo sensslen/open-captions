@@ -1,130 +1,86 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
+﻿using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Pro.LyricsBot.Services;
-using System.Collections.ObjectModel;
 
 namespace Pro.LyricsBot.ViewModels
 {
-    public partial class SettingsVM : ObservableObject, ISettingsVM, ISettings
+    public partial class SettingsVM : ObservableObject, ISettingsVM, ISettings, IDisposable
     {
-        private IAudioToTextService? _audioToTextService;
-        private TextFormattingService? _textFormattingService;
-        private IDisposable? _textChangeSubscription;
-        private SendToProPresenterService? _sendToProPresenterService;
+        public IEnumerable<IModelSettingsVM> ModelSettingsProviders { get; }
 
-        public ObservableCollection<IAudioDeviceDescription> Devices { get; } = new ObservableCollection<IAudioDeviceDescription>();
-        public ObservableCollection<IVoskModelDescriptor> Models { get; } = new ObservableCollection<IVoskModelDescriptor>();
-
+        private IDisposable _transcribedTextSubscription;
         [ObservableProperty]
-        private IAudioDeviceDescription? _selectedAudioSource;
+        private IModelSettingsVM? _selectedModelSettingsProvider;
 
-        partial void OnSelectedAudioSourceChanged(IAudioDeviceDescription? value) => Preferences.Default.Set(nameof(SelectedAudioSource), value?.Id ?? string.Empty);
+        partial void OnSelectedModelSettingsProviderChanged(IModelSettingsVM? value) => SetPreference(nameof(SelectedModelSettingsProvider), value?.Name);
 
-        [ObservableProperty]
-        private IVoskModelDescriptor? _selectedTranscriptionModel;
-
-        partial void OnSelectedTranscriptionModelChanged(IVoskModelDescriptor? value) => Preferences.Default.Set(nameof(SelectedTranscriptionModel), value?.Id ?? string.Empty);
-
-
-        [ObservableProperty]
-        private string _proPresenterHost = Preferences.Default.Get(nameof(ProPresenterHost), string.Empty);
-
-        partial void OnProPresenterHostChanged(string value) => Preferences.Default.Set(nameof(ProPresenterHost), value ?? string.Empty);
-
-
-        [ObservableProperty]
-        private int _proPresenterPort = Preferences.Default.Get(nameof(ProPresenterPort), 80);
-
-        partial void OnProPresenterPortChanged(int value) => Preferences.Default.Set(nameof(ProPresenterPort), value);
-
-
-        [ObservableProperty]
-        private int _lineLength = Preferences.Default.Get(nameof(LineLength), 100);
-
-        partial void OnLineLengthChanged(int value) => Preferences.Default.Set(nameof(LineLength), value);
-
-
-        [ObservableProperty]
-        private int _lineCount = Preferences.Default.Get(nameof(LineCount), 2);
-
-        partial void OnLineCountChanged(int value) => Preferences.Default.Set(nameof(LineCount), value);
-
-
-        [ObservableProperty]
-        private string _messageId = Preferences.Default.Get(nameof(MessageId), string.Empty);
-
-        partial void OnMessageIdChanged(string value) => Preferences.Default.Set(nameof(MessageId), value);
-
-
-        [ObservableProperty]
-        private string _tokenName = Preferences.Default.Get(nameof(TokenName), string.Empty);
-
-        partial void OnTokenNameChanged(string value) => Preferences.Default.Set(nameof(TokenName), value);
+        public string ProPresenterHost { get => _settings.ProPresenterHost; set => _settings.ProPresenterHost = value; }
+        public int ProPresenterPort { get => _settings.ProPresenterPort; set => _settings.ProPresenterPort = value; }
+        public int LineLength { get => _settings.LineLength; set => _settings.LineLength = value; }
+        public int LineCount { get => _settings.LineCount; set => _settings.LineCount = value; }
+        public string MessageId { get => _settings.MessageId; set => _settings.MessageId = value; }
+        public string TokenName { get => _settings.TokenName; set => _settings.TokenName = value; }
 
         [ObservableProperty]
         private string _startStopLabel = "Start";
 
         [ObservableProperty]
         private string _transcribedText = string.Empty;
+        private bool _disposedValue;
+        private readonly IWritableSettings _settings;
 
-        private readonly IAudioSourceProvider _audioSourceProvider;
-        private readonly IModelServiceProvider _modelServiceProvider;
-
-        [RelayCommand]
-        private void StartStop()
+        public SettingsVM(IEnumerable<IModelSettingsVM> availableModelSettings, ITextFormattingService textFormattingService, IWritableSettings settings)
         {
-            if (StartStopLabel == "Start" && SelectedTranscriptionModel is not null && SelectedAudioSource is not null)
-            {
-                _audioToTextService = new AudioToTextService(_modelServiceProvider.Get(SelectedTranscriptionModel), _audioSourceProvider.Open(SelectedAudioSource));
-                _textFormattingService = new TextFormattingService(_audioToTextService, this);
-                //_sendToProPresenterService = new SendToProPresenterService(MessageId, $"{ProPresenterHost}:{ProPresenterPort}");
+            ModelSettingsProviders = availableModelSettings;
+            _settings = settings;
+            _transcribedTextSubscription = textFormattingService.WhenTextChanged.Subscribe(text => TranscribedText = text);
 
-                _textChangeSubscription = _textFormattingService.WhenTextChanged.Subscribe(text =>
+            var previousModelPorviderSelection = GetPreference(nameof(SelectedModelSettingsProvider), string.Empty);
+            foreach (var provider in ModelSettingsProviders)
+            {
+                if (provider.Name == previousModelPorviderSelection)
                 {
-                    TranscribedText = text;
-                    //_sendToProPresenterService.SendAsync(text);
-                });
-
-
-                StartStopLabel = "Stop";
+                    SelectedModelSettingsProvider = provider;
+                }
             }
-            else
+
+            _settings.PropertyChanged += OnSettingsPropertyChanged;
+        }
+
+        private void OnSettingsPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
             {
-                _textChangeSubscription?.Dispose();
-                _textChangeSubscription = null;
-
-                _audioToTextService?.Dispose();
-                _audioToTextService = null;
-
-                _sendToProPresenterService?.Dispose();
-                _sendToProPresenterService = null;
-
-                StartStopLabel = "Start";
+                case nameof(IWritableSettings.ProPresenterHost): OnPropertyChanged(nameof(ProPresenterHost)); break;
+                case nameof(IWritableSettings.ProPresenterPort): OnPropertyChanged(nameof(ProPresenterPort)); break;
+                case nameof(IWritableSettings.LineLength): OnPropertyChanged(nameof(LineLength)); break;
+                case nameof(IWritableSettings.LineCount): OnPropertyChanged(nameof(LineCount)); break;
+                case nameof(IWritableSettings.MessageId): OnPropertyChanged(nameof(MessageId)); break;
+                case nameof(IWritableSettings.TokenName): OnPropertyChanged(nameof(TokenName)); break;
             }
         }
 
-        public SettingsVM(IAudioSourceProvider audioSourceProvider, IModelServiceProvider modelServiceProvider)
+        protected virtual void Dispose(bool disposing)
         {
-            var previousDeviceSelection = Preferences.Default.Get(nameof(SelectedAudioSource), string.Empty);
-            foreach (var device in audioSourceProvider.GetAvailable())
+            if (!_disposedValue)
             {
-                Devices.Add(device);
-                if (device.Id == previousDeviceSelection)
+                if (disposing)
                 {
-                    SelectedAudioSource = device;
+                    _transcribedTextSubscription.Dispose();
                 }
+
+                _disposedValue = true;
             }
-            var previousModelSelection = Preferences.Default.Get(nameof(SelectedTranscriptionModel), string.Empty);
-            foreach (var model in modelServiceProvider.Available())
-            {
-                Models.Add(model);
-                if (model.Id == previousModelSelection)
-                {
-                    SelectedTranscriptionModel = model;
-                }
-            }
-            _audioSourceProvider = audioSourceProvider;
-            _modelServiceProvider = modelServiceProvider;
         }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        private static T GetPreference<T>(string key, T defaultValue) => Preferences.Default.Get($"{nameof(SettingsVM)}.{key}", defaultValue);
+        private void SetPreference<T>(string key, T value) => Preferences.Default.Set($"{nameof(SettingsVM)}.{key}", value);
     }
 }
