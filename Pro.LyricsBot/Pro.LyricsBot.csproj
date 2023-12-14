@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
@@ -57,7 +57,6 @@
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
     <PackageReference Include="NAudio" Version="2.2.1" />
-    <PackageReference Include="ReactiveUI.Maui" Version="19.5.1" />
     <PackageReference Include="RestSharp" Version="110.2.0" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <PackageReference Include="Vosk" Version="0.3.38" />
