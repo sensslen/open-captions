@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Pro.LyricsBot.Pages;
 using RestSharp;
 
 namespace Pro.LyricsBot.Services
@@ -6,16 +7,16 @@ namespace Pro.LyricsBot.Services
 
     public class SendToProPresenterService : DisposableBase, ISendToProPresenterService
     {
-        private readonly string _messageId;
-        private readonly RestClient _client;
+        private RestClient _client;
         private readonly Task<Message?> _getMessageTask;
         private readonly CancellationTokenSource _cancelAsyncTasks = new CancellationTokenSource();
+        private readonly ISettings _settings;
 
-        public SendToProPresenterService(string messageId, string host)
+        public SendToProPresenterService(ISettings settings)
         {
-            _messageId = messageId;
-            _client = new RestClient(host);
+            _client = new RestClient();
             _getMessageTask = GetMessageAsync();
+            _settings = settings;
         }
 
         private async Task<Message?> GetMessageAsync()
@@ -49,8 +50,7 @@ namespace Pro.LyricsBot.Services
         {
             _cancelAsyncTasks.Cancel();
         }
-
-        private string GetMessagePath() => $"v1/message/{_messageId}";
+        private string GetMessagePath() => $"{_settings.ProPresenterHost}:{_settings.ProPresenterPort}/v1/message/{_settings.MessageId}";
 
         private async Task<bool> SendTextAsync(string text, Message message)
         {

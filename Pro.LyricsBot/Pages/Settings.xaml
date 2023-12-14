@@ -132,6 +132,7 @@
         <Label Style="{StaticResource headerStyle}"
                Text="Transcribed Text" />
         <Label Text="{Binding TranscribedText}" />
-
+        <Button Command="{Binding StartStopCommand}"
+                Text="{Binding StartStopLabel}" />
     </VerticalStackLayout>
 </ContentPage>

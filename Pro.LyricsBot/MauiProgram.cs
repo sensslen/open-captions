@@ -29,6 +29,7 @@ namespace Pro.LyricsBot
             builder.Services.AddSingleton<ITextFormattingService, TextFormattingService>();
             builder.Services.AddSingleton<IWritableSettings, Services.Settings>();
             builder.Services.AddSingleton<ISettings>(provider => provider.GetService<IWritableSettings>()!);
+            builder.Services.AddSingleton<ISendToProPresenterService, SendToProPresenterService>();
 
             builder.Services.AddScoped(serviceProvider => new Pages.Settings()
             {
