@@ -9,7 +9,7 @@ namespace Pro.LyricsBot.ViewModels
     {
         private IAudioToTextService? _audioToTextService;
         private TextFormattingService? _textFormattingService;
-        private IDisposable _textChangeSubscription;
+        private IDisposable? _textChangeSubscription;
         private SendToProPresenterService? _sendToProPresenterService;
 
         public ObservableCollection<IAudioDeviceDescription> Devices { get; } = new ObservableCollection<IAudioDeviceDescription>();
@@ -76,19 +76,10 @@ namespace Pro.LyricsBot.ViewModels
             if (StartStopLabel == "Start" && SelectedTranscriptionModel is not null && SelectedAudioSource is not null)
             {
                 _audioToTextService = new AudioToTextService(_modelServiceProvider.Get(SelectedTranscriptionModel), _audioSourceProvider.Open(SelectedAudioSource));
-                _textFormattingService = new TextFormattingService(_audioToTextService);
+                _textFormattingService = new TextFormattingService(_audioToTextService, this);
                 //_sendToProPresenterService = new SendToProPresenterService(MessageId, $"{ProPresenterHost}:{ProPresenterPort}");
 
-                _textChangeSubscription = _audioToTextService.WhenRecognizedTextChanged.Subscribe(text =>
-                {
-                    if (!string.IsNullOrEmpty(text))
-                    {
-                        TranscribedText = text;
-                    }
-                    //_sendToProPresenterService.SendAsync(text);
-                });
-
-                _textChangeSubscription = _audioToTextService.WhenRecognitionEnded.Subscribe(text =>
+                _textChangeSubscription = _textFormattingService.WhenTextChanged.Subscribe(text =>
                 {
                     TranscribedText = text;
                     //_sendToProPresenterService.SendAsync(text);
@@ -99,8 +90,8 @@ namespace Pro.LyricsBot.ViewModels
             }
             else
             {
-                _textFormattingService?.Dispose();
-                _textFormattingService = null;
+                _textChangeSubscription?.Dispose();
+                _textChangeSubscription = null;
 
                 _audioToTextService?.Dispose();
                 _audioToTextService = null;

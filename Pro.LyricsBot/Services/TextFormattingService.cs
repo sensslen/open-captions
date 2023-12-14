@@ -1,40 +1,45 @@
 ﻿// Copyright (c) Renewed Vision, LLC. All rights reserved.
 
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using System.Text;
 
 namespace Pro.LyricsBot.Services
 {
-    internal class TextFormattingService : DisposableBase, ITextFormattingService
+    internal class TextFormattingService : ITextFormattingService
     {
-        private readonly SubjectBase<string> _textChangedSubject = new ReplaySubject<string>(1);
-        private IAudioToTextService _audioToTextService;
-        private IDisposable _recognitionEndedSubscription;
-        private IDisposable _recognizedTextChangedSubscription;
-        private List<string> _previousLines = new List<string>();
-        private string _partialText = "";
+        private readonly ISettings _settings;
+        public IObservable<string> WhenTextChanged { get; }
 
-        public int LineCount { get; set; }
-        public int LineLength { get; set; }
-
-        public TextFormattingService(IAudioToTextService audioToTextService)
+        public TextFormattingService(IAudioToTextService audioToTextService, ISettings settings)
         {
-            _audioToTextService = audioToTextService;
-            _recognitionEndedSubscription = _audioToTextService.WhenRecognitionEnded.Subscribe(AddFinalText);
-            _recognizedTextChangedSubscription = _audioToTextService.WhenRecognizedTextChanged.Subscribe(UpdatePartialText);
+            _settings = settings;
+            WhenTextChanged = audioToTextService.WhenTextChanged.Scan(new TextFormattingState(Array.Empty<string>(), Array.Empty<string>()), GenerateFormattedText).Select(MergeLines);
         }
 
-        public IObservable<string> WhenTextChanged => _textChangedSubject.DistinctUntilChanged();
+        private string MergeLines(TextFormattingState source) => string.Join(Environment.NewLine, source.lines.Concat(source.partialLines).TakeLast(_settings.LineCount));
 
-        private List<string> LineBreak(string text)
+        private TextFormattingState GenerateFormattedText(TextFormattingState state, TextRecognitionResult result)
         {
+            var addedLines = GetLines(result.text);
+            if (result.isEnd)
+            {
+                return new TextFormattingState(state.lines.Concat(addedLines).TakeLast(_settings.LineCount).ToList(), Array.Empty<string>());
+            }
+            else
+            {
+                return state with { partialLines = addedLines };
+            }
+        }
+
+        private IList<string> GetLines(string text)
+        {
+            var words = text.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
             var result = new List<string>();
             var line = new StringBuilder();
 
-            foreach (var word in text.Split(' '))
+            foreach (var word in words)
             {
-                if (line.Length > 0 && line.Length + word.Length + 1 > LineLength)
+                if (line.Length > 0 && line.Length + word.Length + 1 > _settings.LineLength)
                 {
                     result.Add(line.ToString());
                     line.Clear();
@@ -54,52 +59,6 @@ namespace Pro.LyricsBot.Services
             return result;
         }
 
-        private void FormatText()
-        {
-            while (_previousLines.Count > LineCount)
-            {
-                _previousLines.RemoveAt(0);
-            }
-
-            var lines = new List<string>();
-            foreach (var line in _previousLines)
-            {
-                lines.AddRange(LineBreak(line));
-            }
-            if ((_partialText?.Length??0) > 0)
-            {
-                lines.AddRange(LineBreak(_partialText));
-            }
-
-            var output = new StringBuilder();
-            for (int i = LineCount; i > 0; --i)
-            {
-                output.AppendLine(lines[^i]);
-            }
-
-            _textChangedSubject.OnNext(output.ToString());
-        }
-
-        private void UpdatePartialText(string text)
-        {
-            _partialText = text;
-            FormatText();
-        }
-
-        private void AddFinalText(string text)
-        {
-            _partialText = "";
-            if (text.Length > 0)
-            {
-                _previousLines.Add(text);
-            }
-            FormatText();
-        }
-
-        protected override void OnDispose()
-        {
-            _recognizedTextChangedSubscription.Dispose();
-            _recognizedTextChangedSubscription.Dispose();
-        }
+        private record TextFormattingState(IList<string> lines, IList<string> partialLines);
     }
 }

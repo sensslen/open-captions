@@ -2,7 +2,7 @@
 
 namespace Pro.LyricsBot.Services
 {
-    public interface ITextFormattingService : IDisposable
+    public interface ITextFormattingService
     {
         IObservable<string> WhenTextChanged { get; }
     }
