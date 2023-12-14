@@ -1,5 +1,6 @@
-﻿using System.Text.Json.Serialization;
-using Pro.LyricsBot.Pages;
+﻿// Copyright (c) Renewed Vision, LLC. All rights reserved.
+
+using System.Text.Json.Serialization;
 using RestSharp;
 
 namespace Pro.LyricsBot.Services
@@ -8,7 +9,6 @@ namespace Pro.LyricsBot.Services
     public class SendToProPresenterService : DisposableBase, ISendToProPresenterService
     {
         private RestClient _client;
-        private readonly Task<Message?> _getMessageTask;
         private readonly CancellationTokenSource _cancelAsyncTasks = new CancellationTokenSource();
         private readonly ISettings _settings;
 
@@ -19,67 +19,42 @@ namespace Pro.LyricsBot.Services
             _getMessageTask = GetMessageAsync();
         }
 
-        private async Task<Message?> GetMessageAsync()
-        {
-            var request = new RestRequest(GetMessagePath());
-            while (true)
-            {
-                var response = await _client.ExecuteGetAsync<Message>(request, _cancelAsyncTasks.Token);
-                if (response.IsSuccessful)
-                {
-                    return response.Data;
-                }
-            }
-        }
-
         public async Task<bool> SendAsync(string text)
         {
-            var message = await _getMessageTask;
-            if (message is not null)
-            {
-                if (!await SendTextAsync(text, message))
-                {
-                    return false;
-                }
-                return await ShowMessageAsync();
-            }
-            return false;
+            return await ShowMessageAsync(text);
         }
 
         protected override void OnDispose()
         {
             _cancelAsyncTasks.Cancel();
         }
-        private string GetMessagePath() => $"{_settings.ProPresenterHost}:{_settings.ProPresenterPort}/v1/message/{_settings.MessageId}";
 
-        private async Task<bool> SendTextAsync(string text, Message message)
+        private async Task<bool> ShowMessageAsync(string text)
         {
-            var sendMessage = message with { Value = text };
-            var request = new RestRequest(GetMessagePath());
-            request.AddObject(sendMessage);
-            var result = await _client.ExecutePutAsync(request);
-            return result.IsSuccessful;
+            var tokenText = new TokenText(text);
+            var token = new Token(_settings.TokenName, tokenText);
+
+            var request = new RestRequest($"http://{_settings.ProPresenterHost}:{_settings.ProPresenterPort}/v1/message/{_settings.MessageId}/trigger");
+            request.AddBody(new[] { token });
+            try
+            {
+                var result = await _client.ExecutePostAsync(request, _cancelAsyncTasks.Token);
+                return result.IsSuccessful;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
-        private async Task<bool> ShowMessageAsync()
-        {
-            var sendMessage = Array.Empty<Token>();
-            var request = new RestRequest($"{GetMessagePath()}/trigger");
-            request.AddObject(sendMessage);
-            var result = await _client.ExecutePostAsync(request);
-            return result.IsSuccessful;
-        }
+        private sealed record TokenText(
+            [property: JsonPropertyName("text")] string? Text
+            );
 
-        private sealed record Id([property: JsonPropertyName("index")] int Index,
-           [property: JsonPropertyName("name")] string? Name,
-           [property: JsonPropertyName("uuid")] string? Uuid);
+        private sealed record Token(
+            [property: JsonPropertyName("name")] string? Name,
+            [property: JsonPropertyName("text")] TokenText TokenText
+            );
 
-        private sealed record Token();
-
-        private sealed record Message([property: JsonPropertyName("id")] Id Id,
-            [property: JsonPropertyName("message")] string? Value,
-            [property: JsonPropertyName("tokens")] Token[] Tokens,
-            [property: JsonPropertyName("theme")] Id Theme,
-            [property: JsonPropertyName("visible_on_Network")] bool VisibleOnNetwork);
     }
 }

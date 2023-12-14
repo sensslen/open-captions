@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// Copyright (c) Renewed Vision, LLC. All rights reserved.
+
+using Microsoft.Extensions.Logging;
 using Pro.LyricsBot.Services;
 using Pro.LyricsBot.Services.VoskTranscriber;
 using Pro.LyricsBot.ViewModels;
