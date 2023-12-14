@@ -13,17 +13,17 @@ namespace Pro.LyricsBot.Services
         public TextFormattingService(IAudioToTextService audioToTextService, ISettings settings)
         {
             _settings = settings;
-            WhenTextChanged = audioToTextService.WhenTextChanged.Scan(new TextFormattingState(Array.Empty<string>(), Array.Empty<string>()), GenerateFormattedText).Select(MergeLines);
+            WhenTextChanged = audioToTextService.WhenTextChanged.Scan(new TextFormattingState(Array.Empty<Line>(), Array.Empty<Line>()), GenerateFormattedText).Select(MergeLines);
         }
 
-        private string MergeLines(TextFormattingState source) => string.Join(Environment.NewLine, source.lines.Concat(source.partialLines).TakeLast(_settings.LineCount));
+        private string MergeLines(TextFormattingState source) => string.Join(Environment.NewLine, source.lines.Concat(source.partialLines).TakeLast(_settings.LineCount).Select(line => line.text));
 
         private TextFormattingState GenerateFormattedText(TextFormattingState state, TextRecognitionResult result)
         {
             var addedLines = GetLines(result.text);
             if (result.isEnd)
             {
-                return new TextFormattingState(state.lines.Concat(addedLines).TakeLast(_settings.LineCount).ToList(), Array.Empty<string>());
+                return new TextFormattingState(state.lines.Concat(addedLines).TakeLast(_settings.LineCount).Where(line => { var age = DateTime.Now - line.timestamp; return (age.Seconds < 5); }).ToList(), Array.Empty<Line>());
             }
             else
             {
@@ -31,17 +31,17 @@ namespace Pro.LyricsBot.Services
             }
         }
 
-        private IList<string> GetLines(string text)
+        private IList<Line> GetLines(string text)
         {
             var words = text.Split(Array.Empty<char>(), StringSplitOptions.RemoveEmptyEntries);
-            var result = new List<string>();
+            var result = new List<Line>();
             var line = new StringBuilder();
 
             foreach (var word in words)
             {
                 if (line.Length > 0 && line.Length + word.Length + 1 > _settings.LineLength)
                 {
-                    result.Add(line.ToString());
+                    result.Add(new Line(line.ToString(), DateTime.Now));
                     line.Clear();
                 }
                 else if (line.Length > 0)
@@ -53,12 +53,13 @@ namespace Pro.LyricsBot.Services
 
             if (line.Length > 0)
             {
-                result.Add(line.ToString());
+                result.Add(new Line(line.ToString(), DateTime.Now));
             }
 
             return result;
         }
 
-        private record TextFormattingState(IList<string> lines, IList<string> partialLines);
+        private record Line(string text, DateTime timestamp);
+        private record TextFormattingState(IList<Line> lines, IList<Line> partialLines);
     }
 }
