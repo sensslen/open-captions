@@ -4,20 +4,32 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:Pro.LyricsBot.ViewModels.Models"
              x:DataType="vm:IVoskModelSettingsVM">
-    <VerticalStackLayout>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
         <Label Text="Active Audio Device" />
-        <Border Margin="5"
+        <Border Grid.Row="1"
+                Margin="5"
                 Padding="5">
             <Picker ItemDisplayBinding="{Binding Name}"
                     ItemsSource="{Binding AvailableAudioSources}"
                     SelectedItem="{Binding SelectedAudioSource}" />
         </Border>
-        <Label Text="Active Model" />
-        <Border Margin="5"
+        <Label Grid.Column="1"
+               Text="Active Model" />
+        <Border Grid.Row="1"
+                Grid.Column="1"
+                Margin="5"
                 Padding="5">
             <Picker ItemDisplayBinding="{Binding Name}"
                     ItemsSource="{Binding AvailableModels}"
                     SelectedItem="{Binding SelectedModel}" />
         </Border>
-    </VerticalStackLayout>
+    </Grid>
 </ContentView>
