@@ -16,7 +16,7 @@ namespace Pro.LyricsBot.Services
             WhenTextChanged = audioToTextService.WhenTextChanged.Scan(new TextFormattingState(Array.Empty<Line>(), Array.Empty<Line>()), GenerateFormattedText).Select(MergeLines);
         }
 
-        private string MergeLines(TextFormattingState source) => string.Join(Environment.NewLine, source.lines.Concat(source.partialLines).TakeLast(_settings.LineCount).Select(line => { return line.text; }));
+        private string MergeLines(TextFormattingState source) => string.Join(Environment.NewLine, source.lines.Concat(source.partialLines).TakeLast(_settings.LineCount).Select(line => line.text));
 
         private TextFormattingState GenerateFormattedText(TextFormattingState state, TextRecognitionResult result)
         {
