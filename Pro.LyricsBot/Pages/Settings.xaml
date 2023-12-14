@@ -8,7 +8,6 @@
              xmlns:modelVm="clr-namespace:Pro.LyricsBot.ViewModels.Models"
              xmlns:services="clr-namespace:Pro.LyricsBot.Services"
              xmlns:vm="clr-namespace:Pro.LyricsBot.ViewModels"
-             Title="Settings"
              x:DataType="vm:ISettingsVM">
     <ContentPage.Resources>
         <Style x:Key="headerStyle"
@@ -34,7 +33,7 @@
         </global:InterfaceDataTemplateSelector>
     </ContentPage.Resources>
 
-    <VerticalStackLayout>
+    <VerticalStackLayout Margin="20">
         <Label Style="{StaticResource headerStyle}"
                Text="Available Speetch To Text Models" />
         <Border Margin="5"
