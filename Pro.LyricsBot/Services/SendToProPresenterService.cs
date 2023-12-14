@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿// Copyright (c) Renewed Vision, LLC. All rights reserved.
+
+using System.Text.Json.Serialization;
 using Pro.LyricsBot.Pages;
 using RestSharp;
 
@@ -34,52 +36,35 @@ namespace Pro.LyricsBot.Services
 
         public async Task<bool> SendAsync(string text)
         {
-            var message = await _getMessageTask;
-            if (message is not null)
-            {
-                if (!await SendTextAsync(text, message))
-                {
-                    return false;
-                }
-                return await ShowMessageAsync();
-            }
-            return false;
+            return await ShowMessageAsync(text);
         }
 
         protected override void OnDispose()
         {
             _cancelAsyncTasks.Cancel();
+            _textFormattingSubscription.Dispose();
         }
-        private string GetMessagePath() => $"{_settings.ProPresenterHost}:{_settings.ProPresenterPort}/v1/message/{_settings.MessageId}";
 
-        private async Task<bool> SendTextAsync(string text, Message message)
+        private async Task<bool> ShowMessageAsync(string text)
         {
-            var sendMessage = message with { Value = text };
-            var request = new RestRequest(GetMessagePath());
+            var tokenText = new TokenText(text);
+            var token = new Token(_settings.TokenName, tokenText);
+            var sendMessage = Array.Empty<Token>().Append(token);
+
+            var request = new RestRequest($"v1/message/{_settings.MessageId}/trigger");
             request.AddObject(sendMessage);
-            var result = await _client.ExecutePutAsync(request);
+            var result = await _client.ExecutePostAsync(request, _cancelAsyncTasks.Token);
             return result.IsSuccessful;
         }
 
-        private async Task<bool> ShowMessageAsync()
-        {
-            var sendMessage = Array.Empty<Token>();
-            var request = new RestRequest($"{GetMessagePath()}/trigger");
-            request.AddObject(sendMessage);
-            var result = await _client.ExecutePostAsync(request);
-            return result.IsSuccessful;
-        }
+        private sealed record TokenText(
+            [property: JsonPropertyName("text")] string? Text
+            );
 
-        private sealed record Id([property: JsonPropertyName("index")] int Index,
-           [property: JsonPropertyName("name")] string? Name,
-           [property: JsonPropertyName("uuid")] string? Uuid);
+        private sealed record Token(
+            [property: JsonPropertyName("name")] string? Name,
+            [property: JsonPropertyName("text")] TokenText TokenText
+            );
 
-        private sealed record Token();
-
-        private sealed record Message([property: JsonPropertyName("id")] Id Id,
-            [property: JsonPropertyName("message")] string? Value,
-            [property: JsonPropertyName("tokens")] Token[] Tokens,
-            [property: JsonPropertyName("theme")] Id Theme,
-            [property: JsonPropertyName("visible_on_Network")] bool VisibleOnNetwork);
     }
 }

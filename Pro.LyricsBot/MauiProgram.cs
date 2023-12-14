@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿// Copyright (c) Renewed Vision, LLC. All rights reserved.
+
+using Microsoft.Extensions.Logging;
 using Pro.LyricsBot.Services;
 using Pro.LyricsBot.Services.VoskTranscriber;
 using Pro.LyricsBot.ViewModels;
@@ -29,6 +31,7 @@ namespace Pro.LyricsBot
             builder.Services.AddSingleton<ITextFormattingService, TextFormattingService>();
             builder.Services.AddSingleton<IWritableSettings, Services.Settings>();
             builder.Services.AddSingleton<ISettings>(provider => provider.GetService<IWritableSettings>()!);
+            builder.Services.AddSingleton<ISendToProPresenterService, SendToProPresenterService>();
 
             builder.Services.AddScoped(serviceProvider => new Pages.Settings()
             {
