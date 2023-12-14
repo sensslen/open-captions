@@ -2,7 +2,6 @@
 {
     public interface ISettings
     {
-        IAudioDeviceDescription? SelectedAudioSource { get; }
         string ProPresenterHost { get; }
         int ProPresenterPort { get; }
         int LineLength { get; }

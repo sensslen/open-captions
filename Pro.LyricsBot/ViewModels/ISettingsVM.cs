@@ -1,18 +1,13 @@
-﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Pro.LyricsBot.Services;
 
 namespace Pro.LyricsBot.ViewModels
 {
     public interface ISettingsVM : INotifyPropertyChanged
     {
-        public ObservableCollection<IAudioDeviceDescription> Devices { get; }
-        public ObservableCollection<IVoskModelDescriptor> Models { get; }
-
-        public IAudioDeviceDescription? SelectedAudioSource { get; set; }
-        public IVoskModelDescriptor? SelectedTranscriptionModel { get; set; }
-        string? ProPresenterHost { get; set; }
+        public IEnumerable<IModelSettingsVM> ModelSettingsProviders { get; }
+        public IModelSettingsVM SelectedModelSettingsProvider { get; }
+        string ProPresenterHost { get; set; }
         int ProPresenterPort { get; set; }
         int LineLength { get; set; }
         int LineCount { get; set; }
@@ -20,6 +15,5 @@ namespace Pro.LyricsBot.ViewModels
         string TokenName { get; set; }
         string StartStopLabel { get; }
         string TranscribedText { get; }
-        IRelayCommand StartStopCommand { get; }
     }
 }

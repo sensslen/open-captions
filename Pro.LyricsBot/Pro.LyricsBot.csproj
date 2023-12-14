@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks Condition="$([MSBuild]::IsOSPlatform('windows'))">$(TargetFrameworks);net8.0-windows10.0.19041.0</TargetFrameworks>
@@ -70,6 +70,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <MauiXaml Update="Controls\TemplatedContentPresenter.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
+    <MauiXaml Update="Pages\Models\VoskModelSettings.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </MauiXaml>
     <MauiXaml Update="Pages\Settings.xaml">
       <Generator>MSBuild:Compile</Generator>
     </MauiXaml>

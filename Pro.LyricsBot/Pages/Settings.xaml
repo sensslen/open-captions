@@ -2,6 +2,10 @@
 <ContentPage x:Class="Pro.LyricsBot.Pages.Settings"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Pro.LyricsBot.Controls"
+             xmlns:global="clr-namespace:Pro.LyricsBot"
+             xmlns:modelView="clr-namespace:Pro.LyricsBot.Pages.Models"
+             xmlns:modelVm="clr-namespace:Pro.LyricsBot.ViewModels.Models"
              xmlns:services="clr-namespace:Pro.LyricsBot.Services"
              xmlns:vm="clr-namespace:Pro.LyricsBot.ViewModels"
              Title="Settings"
@@ -18,25 +22,29 @@
             <Setter Property="Margin"
                     Value="5,15,0,5" />
         </Style>
+
+        <global:InterfaceDataTemplateSelector x:Key="ModelTemplateSelector">
+            <global:InterfaceDataTemplateSelector.TemplateDictionary>
+                <ResourceDictionary>
+                    <DataTemplate x:Key="IVoskModelSettingsVM">
+                        <modelView:VoskModelSettings />
+                    </DataTemplate>
+                </ResourceDictionary>
+            </global:InterfaceDataTemplateSelector.TemplateDictionary>
+        </global:InterfaceDataTemplateSelector>
     </ContentPage.Resources>
 
     <VerticalStackLayout>
         <Label Style="{StaticResource headerStyle}"
-               Text="Active Audio Devices" />
+               Text="Available Speetch To Text Models" />
         <Border Margin="5"
                 Padding="5">
             <Picker ItemDisplayBinding="{Binding Name}"
-                    ItemsSource="{Binding Devices}"
-                    SelectedItem="{Binding SelectedAudioSource}" />
+                    ItemsSource="{Binding ModelSettingsProviders}"
+                    SelectedItem="{Binding SelectedModelSettingsProvider}" />
         </Border>
-        <Label Style="{StaticResource headerStyle}"
-               Text="Active Model" />
-        <Border Margin="5"
-                Padding="5">
-            <Picker ItemDisplayBinding="{Binding Name}"
-                    ItemsSource="{Binding Models}"
-                    SelectedItem="{Binding SelectedTranscriptionModel}" />
-        </Border>
+        <controls:TemplatedContentPresenter Data="{Binding SelectedModelSettingsProvider}"
+                                            DataTemplateSelector="{StaticResource ModelTemplateSelector}" />
 
         <Label Style="{StaticResource headerStyle}"
                Text="ProPresenter" />
@@ -121,13 +129,9 @@
                    Text="{Binding LineCount}" />
         </Grid>
 
-
-        <Button Margin="10"
-                Command="{Binding StartStopCommand}"
-                Text="{Binding StartStopLabel}" />
-
         <Label Style="{StaticResource headerStyle}"
-               Text="{Binding TranscribedText}" />
+               Text="Transcribed Text" />
+        <Label Text="{Binding TranscribedText}" />
 
     </VerticalStackLayout>
 </ContentPage>
